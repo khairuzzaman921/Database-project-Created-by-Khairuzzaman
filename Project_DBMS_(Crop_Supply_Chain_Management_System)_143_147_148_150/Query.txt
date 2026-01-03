@@ -1,0 +1,353 @@
+CREATE TABLE Admin (
+    ID_No INT PRIMARY KEY,
+    Employee_Name VARCHAR(255),
+    Contact_No VARCHAR(15),
+    Email_Address VARCHAR(255)
+);
+
+CREATE TABLE CropDemandInMarket (
+    Crop_ID INT PRIMARY KEY,
+    ID_No INT,
+    Market_Demand INT,
+    Price_Per_Unit DECIMAL(10, 2),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE Farmer (
+    Farmer_ID INT PRIMARY KEY,
+    ID_No INT,
+    Crop_ID INT,
+    Farmer_Name VARCHAR(255),
+    Age INT,
+    Gender VARCHAR(10),
+    Farmer_Contact_Number VARCHAR(15),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No),
+    FOREIGN KEY (Crop_ID) REFERENCES CropDemandInMarket(Crop_ID)
+);
+CREATE TABLE Property (
+    Property_ID INT PRIMARY KEY,
+    Farmer_ID INT,
+    Property_Address VARCHAR(255),
+    Property_Size DECIMAL(10, 2),
+    Property_Value DECIMAL(15, 2),
+    Crop_Type VARCHAR(50),
+    FOREIGN KEY (Farmer_ID) REFERENCES Farmer(Farmer_ID)
+);
+
+CREATE TABLE FarmersCost (
+    Cost_ID INT PRIMARY KEY,
+    ID_No INT,
+    Farmer_ID INT,
+    Seed_Cost DECIMAL(10, 2),
+    Fertilizer_Cost DECIMAL(10, 2),
+    Labor_Cost DECIMAL(10, 2),
+    Other_Expenses DECIMAL(10, 2),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No),
+    FOREIGN KEY (Farmer_ID) REFERENCES Farmer(Farmer_ID)
+);
+
+CREATE TABLE HarvestingEquipmentSystem (
+    Equipment_ID INT PRIMARY KEY,
+    ID_No INT,
+    Equipment_Name VARCHAR(255),
+    Equipment_Type VARCHAR(50),
+    Equipment_Cost DECIMAL(10, 2),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE CropBatch (
+    Batch_ID INT PRIMARY KEY,
+    Crop_ID INT,
+    Farmer_ID INT,
+    ID_No INT,
+    Batch_Size DECIMAL(10, 2),
+    Batch_Rate DECIMAL(10, 2),
+    Batch_Date DATE,
+    FOREIGN KEY (Crop_ID) REFERENCES CropDemandInMarket(Crop_ID),
+    FOREIGN KEY (Farmer_ID) REFERENCES Farmer(Farmer_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE FarmersProfit (
+    Profit_ID INT PRIMARY KEY,
+    Farmer_ID INT,
+    Total_Revenue DECIMAL(15, 2),
+    Total_Expenses DECIMAL(15, 2),
+    Net_Profit DECIMAL(15, 2),
+    FOREIGN KEY (Farmer_ID) REFERENCES Farmer(Farmer_ID)
+);
+
+CREATE TABLE FarmersLoan (
+    Loan_ID INT PRIMARY KEY,
+    Farmer_ID INT,
+    Cost_ID INT,
+    ID_No INT,
+    Loan_Amount DECIMAL(15, 2),
+    Interest_Rate DECIMAL(5, 2),
+    Loan_Duration INT,
+    FOREIGN KEY (Farmer_ID) REFERENCES Farmer(Farmer_ID),
+    FOREIGN KEY (Cost_ID) REFERENCES FarmersCost(Cost_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE ProductSupply (
+    Supply_ID INT PRIMARY KEY,
+    Crop_ID INT,
+    ID_No INT,
+    Supply_Quantity DECIMAL(10, 2),
+    Supply_Date DATE,
+    FOREIGN KEY (Crop_ID) REFERENCES CropDemandInMarket(Crop_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE SupplyManagement (
+    Supplier_ID INT PRIMARY KEY,
+    Supply_ID INT,
+    Batch_ID INT,
+    ID_No INT,
+    Supplier_Name VARCHAR(255),
+    Management_Type VARCHAR(50),
+    FOREIGN KEY (Supply_ID) REFERENCES ProductSupply(Supply_ID),
+    FOREIGN KEY (Batch_ID) REFERENCES CropBatch(Batch_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE Manufacturer (
+    Product_ID INT PRIMARY KEY,
+    Supply_ID INT,
+    ID_No INT,
+    Product_Name VARCHAR(255),
+    Product_Price DECIMAL(10, 2),
+    No_of_Packages INT,
+    FOREIGN KEY (Supply_ID) REFERENCES ProductSupply(Supply_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE DistributionCenter (
+    DCenter_ID INT PRIMARY KEY,
+    Product_ID INT,
+    ID_No INT,
+    Center_Name VARCHAR(255),
+    Center_Location VARCHAR(255),
+    FOREIGN KEY (Product_ID) REFERENCES Manufacturer(Product_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE ShopsSellerMarket (
+    Shop_ID INT PRIMARY KEY,
+    Product_ID INT,
+    Tax_ID INT,
+    DCenter_ID INT,
+    Shop_Name VARCHAR(255),
+    Shop_Location VARCHAR(255),
+    FOREIGN KEY (Product_ID) REFERENCES Manufacturer(Product_ID),
+    FOREIGN KEY (Tax_ID) REFERENCES Tax(Tax_ID),
+    FOREIGN KEY (DCenter_ID) REFERENCES DistributionCenter(DCenter_ID)
+);
+
+CREATE TABLE Exportation (
+    Shipment_ID INT PRIMARY KEY,
+    Crop_ID INT,
+    Tax_ID INT,
+    Supplier_ID INT,
+    Shipment_Cost DECIMAL(10, 2),
+    Export_Quantity DECIMAL(10, 2),
+    Export_Date DATE,
+    FOREIGN KEY (Crop_ID) REFERENCES CropDemandInMarket(Crop_ID),
+    FOREIGN KEY (Tax_ID) REFERENCES Tax(Tax_ID),
+    FOREIGN KEY (Supplier_ID) REFERENCES SupplyManagement(Supplier_ID)
+);
+
+CREATE TABLE Tax (
+    Tax_ID INT PRIMARY KEY,
+    ID_No INT,
+    Tax_Type VARCHAR(50),
+    Tax_Rate DECIMAL(5, 2),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+
+CREATE TABLE BuyersConsumer (
+    Buyers_ID INT PRIMARY KEY,
+    Product_ID INT,
+    Tax_ID INT,
+    Shop_ID INT,
+    Buyers_Name VARCHAR(255),
+    Buyers_Contact VARCHAR(15),
+    FOREIGN KEY (Product_ID) REFERENCES Manufacturer(Product_ID),
+    FOREIGN KEY (Tax_ID) REFERENCES Tax(Tax_ID),
+    FOREIGN KEY (Shop_ID) REFERENCES ShopsSellerMarket(Shop_ID)
+);
+
+CREATE TABLE TotalTransactionInEconomy (
+    Transaction_ID INT PRIMARY KEY,
+    Tax_ID INT,
+    ID_No INT,
+    Total_Transaction_Value DECIMAL(15, 2),
+    Transaction_Date DATE,
+    FOREIGN KEY (Tax_ID) REFERENCES Tax(Tax_ID),
+    FOREIGN KEY (ID_No) REFERENCES Admin(ID_No)
+);
+INSERT INTO Property (Property_ID, Farmer_ID, Property_Address, Property_Size, Property_Value, Crop_Type)
+VALUES
+    (201,101, 'Khulna', 10.5, 10000.00, 'Corn'),
+    (202, 102, 'Cumilla', 8.0, 8000.00, 'Rice');
+
+INSERT INTO Farmers_Cost (Cost_ID, ID_No, Farmer_ID, Seed_Cost, Fertilizer_Cost, Labor_Cost, Other_Expenses)
+VALUES
+    (301, 43, 101, 500.00, 300.00, 1000.00, 200.00),
+    (302, 47, 102, 700.00, 400.00, 1200.00, 250.00);
+
+INSERT INTO Harvesting_Equipment_System (Equipment_ID, ID_No, Equipment_Name, Equipment_Type, Equipment_Cost)
+VALUES
+    (401, 43, 'Combine Harvester', 'Heavy Machinery', 50000.00),
+    (402, 50, 'Tractor', 'Heavy Machinery', 30000.00);
+
+INSERT INTO Farmers_Loan (Loan_ID, Farmer_ID, Cost_ID, Loan_Amount, Interest_Rate, Loan_Duration, ID_No)
+VALUES
+    (501, 101, 301, 20000.00, 5.5, 24, 47),
+    (502, 102, 302, 25000.00, 6.0, 36, 48);
+
+INSERT INTO Crop_Demand_Market (Crop_ID, ID_No, Market_Demand, Price_Per_Unit)
+VALUES
+    (1, 43, 500, 10.50),
+    (2, 47, 800, 8.75),
+    (3, 48, 300, 12.00);
+
+
+
+
+
+
+
+INSERT INTO Crop_Batch (Batch_ID, Crop_ID, Farmer_ID, ID_No, Crop_Name, Batch_Size, Batch_Rate, Batch_Date)
+VALUES
+    (601,2, 101, 47, 'Corn Batch 1', 500, 12.50, '2024-04-20'),
+    (602, 3, 102, 48, 'Rice Batch 1', 800, 10.00, '2024-04-22');
+
+INSERT INTO Farmers_Profit (Profit_ID, Farmer_ID, Total_Revenue, Total_Expenses, Net_Profit)
+VALUES
+    (701, 101, 15000.00, 8000.00, 7000.00),
+    (702, 102, 20000.00, 10000.00, 10000.00);
+
+INSERT INTO Product_Supply (Supply_ID, Crop_ID, ID_No, Supply_Quantity, Supply_Date)
+VALUES
+    (801, 1, 43, 400, '2024-04-25'),
+    (802, 2, 47, 700, '2024-04-26');
+
+INSERT INTO Supply_Management (Supplier_ID, Supply_ID, Batch_ID, ID_No, Supplier_Name, Management_Type)
+VALUES
+    (901, 801, 601, 47, 'Farmers Supply Co.', 'Direct'),
+    (902, 802, 602, 48, 'Agro Distributors', 'Indirect');
+
+INSERT INTO Farmer (Farmer_ID, ID_No, Crop_ID, Farmer_Name, Age, Gender, Farmer_Contact_Number)
+VALUES
+    (101, 48, 1, 'Onnesha', 35, 'female', '+880 1893-779299'),
+    (102, 50, 2, 'Kamrul', 28, 'male', '+880 1793-462900');
+
+INSERT INTO Manufacturer (Product_ID, Supply_ID, ID_No, Product_Name, Product_Price, No_of_Packages)
+VALUES
+    (1001, 801, 50, 'Corn Package', 15.00, 500),
+    (1002, 802, 47, 'Rice Package', 12.50, 800);
+
+INSERT INTO Distribution_Center (Center_ID, Product_ID, ID_No, Center_Name, Center_Location)
+VALUES
+    (2001, 1001, 43, 'AgroMart Distribution Center', 'Dhaka'),
+    (2002, 1002, 48, 'Farmers Supply Depot', 'Feni');
+
+INSERT INTO Tax (Tax_ID, ID_No, Tax_Type, Tax_Rate)
+VALUES
+    (3001, 47, 'Sales Tax', 8.0),
+    (3002, 48, 'VAT', 10.0);
+
+INSERT INTO Shops_Seller_Market (Shop_ID, Product_ID, Tax_ID, DCenter_ID, Shop_Name, Shop_Location)
+VALUES
+    (4001, 1001, 3001, 2001, 'AgroMart Outlet', 'Barisal'),
+    (4002, 1002, 3002, 2002, 'Farmers Market', 'Munshigonj');
+
+INSERT INTO Exportation (Shipment_ID, Crop_ID, Tax_ID, Supplier_ID, Shipment_Cost, Export_Quantity, Export_Date)
+VALUES
+    (5001, 1, 3001, 901, 5000.00, 200, '2024-04-27'),
+    (5002, 2, 3002, 902, 7500.00, 300, '2024-04-28');
+
+INSERT INTO Buyers_Consumer (Buyers_ID, Product_ID, Tax_ID, Shop_ID, Buyers_Name, Buyers_Contact)
+VALUES
+    (6001, 1001, 3001, 4001, 'Imtiaj', '+880 1903-069376'),
+    (6002, 1002, 3002, 4002, 'Maliha', '+880 1720-495548');
+
+INSERT INTO Total_Transaction_Economy (Transaction_ID, Tax_ID, ID_No, Total_Transaction_Value, Transaction_Date)
+VALUES
+    (7001, 3001, 48, 2000.00, '2024-06-23'),
+    (7002, 3002, 50, 2500.00, '2024-04-24');
+query:
+Retrieve Farmers' Names and Contact Numbers:
+
+SELECT Farmer_Name, Farmer_Contact_Number FROM Farmer;
+
+
+
+.Concat Operation:
+SELECT concat('ID_No', ' ', 'Email_Address')As new_information;
+
+Count the Number of Shops in Each Location:
+
+SELECT Shop_Location, COUNT(Shop_ID) AS Shop_Count
+FROM Shops_Seller_Market
+GROUP BY Shop_Location;
+
+
+Find the Total Transaction Value for Each Tax Type:
+
+SELECT Tax_Type, SUM(Total_Transaction_Value) AS Total_Value
+FROM Tax
+JOIN Total_Transaction_Economy ON Tax.Tax_ID = Total_Transaction_Economy.Tax_ID
+GROUP BY Tax_Type;
+
+List the Manufacturers with their Product Names and Prices:
+SELECT Manufacturer.Product_ID, Manufacturer.Product_Name, Manufacturer.Product_Price
+FROM Manufacturer;
+
+
+Retrieve Crop Batches with a Batch Rate Over $10.00:
+
+SELECT Batch_ID, Crop_Name, Batch_Rate
+FROM Crop_Batch
+WHERE Batch_Rate > 10.00;
+
+
+.Identify Farmers Who Took Loans with a Loan Amount Over $20,000:
+
+SELECT Farmer_ID, Loan_Amount
+FROM Farmers_Loan
+WHERE Loan_Amount > 20000;
+
+
+Find the Average Price Per Unit of Each Crop:
+SELECT Crop_ID, AVG(Price_Per_Unit) AS Avg_Price_Per_Unit
+FROM Crop_Demand_Market
+GROUP BY Crop_ID;
+
+
+
+List the Top 5 Farmers by Net Profit:
+SELECT Farmer_ID, Net_Profit
+FROM Farmers_Profit
+ORDER BY Net_Profit DESC
+LIMIT 5;
+
+
+
+Calculate Total Expenses for Each Farmer:
+
+SELECT Farmer_ID, SUM(Seed_Cost + Fertilizer_Cost + Labor_Cost + Other_Expenses) AS Total_Expenses
+FROM Farmers_Cost GROUP BY Farmer_ID;
+
+
+
+Find the Total Supply Quantity of Each Product:
+
+SELECT Supply_ID, SUM(Supply_Quantity) AS Total_Supply_Quantity
+FROM Product_Supply
+
+
+
+
